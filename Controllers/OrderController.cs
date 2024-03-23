@@ -1,33 +1,57 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ShoppingCartSystem.DataAccess.ProductManagement;
+using ShoppingCartSystem.DataAccess.TransactionManagement;
 using ShoppingCartSystem.Models;
 
 namespace ShoppingCartSystem.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ProductController : Controller
+    public class OrderController : Controller
     {
-        private readonly IProductRepo productRepo;
+        private readonly IOrderRepo orderRepo;
 
-        public ProductController(IProductRepo productRepo)
+        public OrderController(IOrderRepo orderRepo)
         {
-            this.productRepo = productRepo;
+            this.orderRepo = orderRepo;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response>> AddProduct(Product newProduct)
+        public async Task<ActionResult<Response>> AddToCart(Cart item)
         {
             Response response;
             try
             {
-                await productRepo.AddProduct(newProduct);
+                await orderRepo.AddToCart(item);
                 response = new Response()
                 {
                     IsSuccess = true,
-                    Message = "Product Added successfully"
+                    Message = "Added successfully"
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response = new Response()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+                return BadRequest(response);
+            }
+        }
+
+        [HttpPost("checkout")]
+        public async Task<ActionResult<Response>> CheckoutCart(Order order)
+        {
+            Response response;
+            try
+            {
+                await orderRepo.CheckoutCart(order);
+                response = new Response()
+                {
+                    IsSuccess = true,
+                    Message = "Order successfully placed"
                 };
                 return Ok(response);
             }
@@ -43,16 +67,16 @@ namespace ShoppingCartSystem.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<Response>> UpdateProduct(Product product)
+        public async Task<ActionResult<Response>> UpdateCartItem(Cart updatedItem)
         {
             Response response;
             try
             {
-                await productRepo.UpdateProduct(product);
+                await orderRepo.UpdateCartItem(updatedItem);
                 response = new Response()
                 {
                     IsSuccess = true,
-                    Message = "Grocery updated successfully"
+                    Message = "Cart updated successfully"
                 };
                 return Ok(response);
             }
@@ -67,52 +91,42 @@ namespace ShoppingCartSystem.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<ActionResult<Product>> GetProducts()
-        {
-            try
-            {
-                var groceries = await productRepo.GetProducts();
-                return Ok(groceries);
-            }
-            catch (Exception)
-            {
-                return NoContent();
-            }
-        }
+
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<Cart>> GetCartItems(int id)
         {
             try
             {
-                var product = await productRepo.GetProduct(id);
-                return Ok(product);
+                var cartItems = await orderRepo.GetCartItems(id);
+                return Ok(cartItems);
             }
             catch (Exception)
             {
                 return NoContent();
             }
         }
+
+
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult<Response>> DeleteProduct(int id)
+        public async Task<ActionResult<Response>> DeleteCartItem(int id)
         {
             Response response;
             try
             {
-                await productRepo.DeleteProduct(id);
+                await orderRepo.DeleteCartItem(id);
                 response = new Response()
                 {
                     IsSuccess = true,
-                    Message = "Product deleted successfully"
+                    Message = "Item removed from cart successfully"
                 };
                 return Ok(response);
             }
-            catch (Exception rex)
+            catch (Exception ex)
             {
                 response = new Response()
                 {
                     IsSuccess = false,
-                    Message = rex.Message
+                    Message = ex.Message
                 };
                 return BadRequest(response);
             }
