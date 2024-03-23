@@ -1,82 +1,119 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ShoppingCartSystem.DataAccess.ProductManagement;
+using ShoppingCartSystem.Models;
 
 namespace ShoppingCartSystem.Controllers
 {
+    [Route("[controller]")]
+    [ApiController]
     public class ProductController : Controller
     {
-        // GET: ProductController
-        public ActionResult Index()
+        private readonly IProductRepo productRepo;
+
+        public ProductController(IProductRepo productRepo)
         {
-            return View();
+            this.productRepo = productRepo;
         }
 
-        // GET: ProductController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: ProductController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: ProductController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult<Response>> AddProduct(Product newProduct)
+        {
+            Response response;
+            try
+            {
+                await productRepo.AddProduct(newProduct);
+                response = new Response()
+                {
+                    IsSuccess = true,
+                    Message = "Product Added successfully"
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response = new Response()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+                return BadRequest(response);
+            }
+        }
+
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdateProduct(Product product)
+        {
+            Response response;
+            try
+            {
+                await productRepo.UpdateProduct(product);
+                response = new Response()
+                {
+                    IsSuccess = true,
+                    Message = "Grocery updated successfully"
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response = new Response()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<Product>> GetProducts()
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var groceries = await productRepo.GetProducts();
+                return Ok(groceries);
             }
-            catch
+            catch (Exception)
             {
-                return View();
+                return NoContent();
             }
         }
-
-        // GET: ProductController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: ProductController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var product = await productRepo.GetProduct(id);
+                return Ok(product);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return NoContent();
             }
         }
-
-        // GET: ProductController/Delete/5
-        public ActionResult Delete(int id)
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult<Response>> DeleteProduct(int id)
         {
-            return View();
-        }
-
-        // POST: ProductController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
+            Response response;
             try
             {
-                return RedirectToAction(nameof(Index));
+                await productRepo.DeleteProduct(id);
+                response = new Response()
+                {
+                    IsSuccess = true,
+                    Message = "Product deleted successfully"
+                };
+                return Ok(response);
             }
-            catch
+            catch (Exception rex)
             {
-                return View();
+                response = new Response()
+                {
+                    IsSuccess = false,
+                    Message = rex.Message
+                };
+                return BadRequest(response);
             }
         }
     }
