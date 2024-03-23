@@ -63,7 +63,7 @@ namespace ShoppingCartSystem.Controllers
                     IsSuccess = false,
                     Message = ex.Message
                 };
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
+                return BadRequest(response);
             }
         }
 
@@ -88,7 +88,7 @@ namespace ShoppingCartSystem.Controllers
                 var product = await productRepo.GetProduct(id);
                 return Ok(product);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return NoContent();
             }

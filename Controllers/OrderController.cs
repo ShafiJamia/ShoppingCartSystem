@@ -16,7 +16,6 @@ namespace ShoppingCartSystem.Controllers
             this.orderRepo = orderRepo;
         }
 
-
         [HttpPost]
         public async Task<ActionResult<Response>> AddToCart(Cart item)
         {
@@ -101,9 +100,9 @@ namespace ShoppingCartSystem.Controllers
                 var cartItems = await orderRepo.GetCartItems(id);
                 return Ok(cartItems);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
+                return NoContent();
             }
         }
 
