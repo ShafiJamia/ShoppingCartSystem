@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,7 +14,7 @@ namespace ShoppingCartSystem.Models
         [Required]
         public string Description { get; set; }
         [Required]
-        public string Price { get; set; }
+        public float Price { get; set; }
         [Required]
         public int Stock { get; set; }
         public int Review { get; set; }

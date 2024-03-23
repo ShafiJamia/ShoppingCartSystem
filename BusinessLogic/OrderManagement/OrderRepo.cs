@@ -25,10 +25,14 @@ namespace ShoppingCartSystem.DataAccess.OrderManagement
                 }
 
                 var product = await appDbContext.Products.FindAsync(item.ProductId);
-
+                var user = await appDbContext.Users.FindAsync(item.UserId);
+                if(user == null)
+                {
+                    throw new Exception("No such user exists");
+                }
                 if(product == null)
                 {
-                    throw new Exception("No such product exist");
+                    throw new Exception("No such product exists");
                 }
                 if (item.Quantity > product.Stock)
                 {
@@ -92,11 +96,11 @@ namespace ShoppingCartSystem.DataAccess.OrderManagement
             }
         }
 
-        public async Task<List<Cart>> GetCartItems(User user)
+        public async Task<List<Cart>> GetCartItems(int userId)
         {
             try
             {
-                var cartEntries = await appDbContext.Carts.Where(c => c.UserId == user.UserId).ToListAsync();
+                var cartEntries = await appDbContext.Carts.Where(c => c.UserId == userId).ToListAsync();
 
                 if (cartEntries.Count == 0)
                 {
@@ -110,7 +114,7 @@ namespace ShoppingCartSystem.DataAccess.OrderManagement
                 throw new Exception("Error in GetCartItems");
             }
         }
-
+        
         public async Task UpdateCartItem(Cart updatedItem)
         {
             try
